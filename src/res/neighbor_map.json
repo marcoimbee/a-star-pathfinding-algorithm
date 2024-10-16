@@ -1,0 +1,25 @@
+{
+    "mainOffsets": {
+      "central": [[-1, 0], [1, 0], [0, -1], [0, 1]],
+      "topRow": [[0, -1], [0, 1], [1, 0]],
+      "bottomRow": [[0, -1], [0, 1], [-1, 0]],
+      "leftColumn": [[-1, 0], [1, 0], [0, 1]],
+      "rightColumn": [[-1, 0], [1, 0], [0, -1]],
+      "topLeftCorner": [[0, 1], [1, 0]],
+      "topRightCorner": [[0, -1], [1, 0]],
+      "bottomLeftCorner": [[0, 1], [-1, 0]],
+      "bottomRightCorner": [[0, -1], [-1, 0]]
+    },
+    "diagonalOffsets": {
+      "central": [[-1, -1], [-1, 1], [1, -1], [1, 1]],
+      "topRow": [[1, -1], [1, 1]],
+      "bottomRow": [[-1, -1], [-1, 1]],
+      "leftColumn": [[-1, 1], [1, 1]],
+      "rightColumn": [[-1, -1], [1, -1]],
+      "topLeftCorner": [[1, 1]],
+      "topRightCorner": [[1, -1]],
+      "bottomLeftCorner": [[-1, 1]],
+      "bottomRightCorner": [[-1, -1]]
+    }
+  }
+  

@@ -1,0 +1,38 @@
+#grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.row{
+    display: flex;
+}
+
+.cell{
+    height: 5px;
+    width: 5px;
+    border: 0.1px solid black;
+    /* border-radius: 50%; */
+    display: flex;
+    font-size: x-small;
+    color: grey;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+    background-color: antiquewhite;
+}
+
+.obstacle-cell {
+    background-color: black;
+}
+
+.visited-neighbor-cell {
+    background-color: #f7ce61;
+}
+
+.final-path-cell {
+    background-color: #c01f2f;
+}
+
+.unreachable-destination-cell {
+    background-color: grey;
+}
