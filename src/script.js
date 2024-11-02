@@ -8,58 +8,58 @@ document.addEventListener('DOMContentLoaded', async function() {
     const CONSIDER_DIAGONALS = 1;
     const OFFSETS_FILE = 'res/neighbor_map.json';
 
-    let nodes = createGrid(ROWS, COLS);
-    setupObstacles(nodes, TOT_OBSTACLES, GRID_DIM);
+    let cells = createGrid(ROWS, COLS);
+    setupObstacles(cells, TOT_OBSTACLES, GRID_DIM);
 
-    // console.log(nodes);
+    // console.log(cells);
 
     let finalPath = null;
 
     let start = 0;
     let goal = GRID_DIM - 1;
 
-    let openList = new Array();         // Array of Node IDs!
-    let closedList = new Array();       // Array of Node IDs!
+    let openList = new Array();         // Array of cell IDs!
+    let closedList = new Array();       // Array of cell IDs!
     let cameFrom = new Map();
 
     const offsets = await loadOffsets(OFFSETS_FILE);        // NEIGHBOR OFFSETS
 
-    // Start node init
-    nodes[start].setGScore(0);          // Set g score of start node to 0
-    nodes[start].setFScore(             // Set f score of start node to h(start)
+    // Start cell init
+    cells[start].setGScore(0);          // Set g score of start cell to 0
+    cells[start].setFScore(             // Set f score of start cell to h(start)
         computeHValue(
-            nodes[start], 
-            nodes[goal], 
+            cells[start], 
+            cells[goal], 
             DISTANCE_FUNCTION
         )
     );    
 
     console.log("ZOOM LEVEL: ", window.devicePixelRatio);
     
-    // let obstacles = nodes.filter(node => node.getIsObstacle() == true);
+    // let obstacles = cells.filter(cell => cell.getIsObstacle() == true);
     // console.table(obstacles);
     
-    openList.push(nodes[start].getId());        // Add start node to open list. f value is set before
+    openList.push(cells[start].getId());        // Add start cell to open list. f value is set before
 
     console.time("EXECUTION TIME");
 
     let iterCounter = 0;
     while (openList.length != 0) {
 
-        let currentNode = getLowestFScoreNode(nodes, openList);       // Find node with lowest f score
-        // console.log("currentNode: ", currentNode);
+        let currentCell = getLowestFScoreCell(cells, openList);       // Find cell with lowest f score
+        // console.log("currentCell: ", currentCell);
 
-        if (currentNode == null) {
+        if (currentCell == null) {
             console.timeEnd("EXECUTION TIME");
-            console.log("No valid nodes left to explore");
+            console.log("No valid cells left to explore");
             console.log("FAILURE!");
             break;
         }
 
-        if (currentNode.getId() == goal) {       // Goal is reached, reconstruct the path
+        if (currentCell.getId() == goal) {       // Goal is reached, reconstruct the path
             console.log("FINISHED");
-            // console.log("CURRENT NODE: ", currentNode);
-            finalPath = reconstructPath(cameFrom, currentNode);
+            // console.log("CURRENT CELL: ", currentCell);
+            finalPath = reconstructPath(cameFrom, currentCell);
 
             console.timeEnd("EXECUTION TIME");
 
@@ -68,27 +68,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             break;
         }
 
-        closedList.push(currentNode.getId());       // Mark current node as visited
-        openList = openList.filter(nodeId =>         // Remove current node from open list
-            !(nodeId == currentNode.getId())
+        closedList.push(currentCell.getId());       // Mark current cell as visited
+        openList = openList.filter(cellId =>         // Remove current cell from open list
+            !(cellId == currentCell.getId())
         );
 
 
-        // Explore neighbors of the current node
-        let currentNodeNeighbors = getNeighbors(currentNode, nodes, ROWS, COLS, offsets, CONSIDER_DIAGONALS);
-        await displayNeighbors(currentNodeNeighbors, 20);
+        // Explore neighbors of the current cell
+        let currentCellNeighbors = getNeighbors(currentCell, cells, ROWS, COLS, offsets, CONSIDER_DIAGONALS);
+        await displayNeighbors(currentCellNeighbors, 20);
         
-        currentNodeNeighbors.forEach(neighbor => {
+        currentCellNeighbors.forEach(neighbor => {
 
             // If neighbor is not an obstacle or is in closed list go on
             if (!(neighbor.getIsObstacle() || closedList.includes(neighbor.getId()))) {
 
-                let tentativeG = currentNode.getGScore() + 1;       // Potential cost of reaching neighbor node through current node
+                let tentativeG = currentCell.getGScore() + 1;       // Potential cost of reaching neighbor cell through current cell
             
                 if (tentativeG < neighbor.getGScore()) {    // If neighbor is not in open_list or a better path is found
-                    cameFrom.set(neighbor.getId(), currentNode);        
+                    cameFrom.set(neighbor.getId(), currentCell);        
                     neighbor.setGScore(tentativeG);
-                    neighbor.setFScore(neighbor.getGScore() + computeHValue(neighbor, nodes[goal], DISTANCE_FUNCTION));
+                    neighbor.setFScore(neighbor.getGScore() + computeHValue(neighbor, cells[goal], DISTANCE_FUNCTION));
                 
                     // Check if neighbor is already in open list
                     if (!openList.includes(neighbor.getId())) {
@@ -98,8 +98,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
 
-        // Check if no path exists from start to goal node
-        if (openList.length == 0 && currentNode.getId() != goal) {
+        // Check if no path exists from start to goal cell
+        if (openList.length == 0 && currentCell.getId() != goal) {
             console.log("Goal is unreachable in this configuration.");
             console.timeEnd("EXECUTION TIME");
             await displayUnreachable(closedList, 5);
@@ -111,8 +111,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 async function displayUnreachable(closedList, ms) {
-    for (const node of closedList) {
-        let divElement = document.getElementById('cell_' + node);
+    for (const cell of closedList) {
+        let divElement = document.getElementById('cell_' + cell);
         divElement.classList.add('unreachable-destination-cell');
         await delay(ms);
     }
@@ -128,8 +128,8 @@ async function displayNeighbors(neighbors, ms) {
 }
 
 async function displayFinalPath(path, ms) {
-    for (const node of path) {
-        let divElement = document.getElementById('cell_' + node.getId());
+    for (const cell of path) {
+        let divElement = document.getElementById('cell_' + cell.getId());
         divElement.classList.add('final-path-cell');
         await delay(ms);           // Wait for 200 ms before coloring the next cell
     }
@@ -141,39 +141,39 @@ function delay(ms) {
 }
 
 
-function getNeighbors(node, nodes, rows, cols, offsets, considerDiagonals) {
+function getNeighbors(cell, cells, rows, cols, offsets, considerDiagonals) {
     let neighbors = [];
 
     const { mainOffsets, diagonalOffsets } = offsets;
 
-    // Determine the type of node and corresponding offsets
-    let nodeType;
-    if (node.isCentralNode(rows, cols)) nodeType = 'central';
-    else if (node.isTopRowNode()) nodeType = 'topRow';
-    else if (node.isBottomRowNode(rows)) nodeType = 'bottomRow';
-    else if (node.isLeftColumnNode()) nodeType = 'leftColumn';
-    else if (node.isRightColumnNode(cols)) nodeType = 'rightColumn';
-    else if (node.isTopLeftCornerNode()) nodeType = 'topLeftCorner';
-    else if (node.isTopRightCornerNode(cols)) nodeType = 'topRightCorner';
-    else if (node.isBottomLeftCornerNode(rows)) nodeType = 'bottomLeftCorner';
-    else if (node.isBottomRightCornerNode(rows, cols)) nodeType = 'bottomRightCorner';
+    // Determine the type of cell and corresponding offsets
+    let cellType = undefined;
+    if (cell.isCentralCell(rows, cols)) cellType = 'central';
+    else if (cell.isTopRowCell()) cellType = 'topRow';
+    else if (cell.isBottomRowCell(rows)) cellType = 'bottomRow';
+    else if (cell.isLeftColumnCell()) cellType = 'leftColumn';
+    else if (cell.isRightColumnCell(cols)) cellType = 'rightColumn';
+    else if (cell.isTopLeftCornerCell()) cellType = 'topLeftCorner';
+    else if (cell.isTopRightCornerCell(cols)) cellType = 'topRightCorner';
+    else if (cell.isBottomLeftCornerCell(rows)) cellType = 'bottomLeftCorner';
+    else if (cell.isBottomRightCornerCell(rows, cols)) cellType = 'bottomRightCorner';
 
-    // Use the offsets for the identified node type
-    if (nodeType) {
-        mainOffsets[nodeType].forEach(offset => {
-            const x = node.getX() + offset[0];
-            const y = node.getY() + offset[1];
-            const neighbor = getNodeFromCoordinates(x, y, nodes);
+    // Use the offsets for the identified cell type
+    if (cellType) {
+        mainOffsets[cellType].forEach(offset => {
+            const x = cell.getX() + offset[0];
+            const y = cell.getY() + offset[1];
+            const neighbor = getCellFromCoordinates(x, y, cells);
             if (neighbor) {
                 neighbors.push(neighbor);
             }
         });
 
         if (considerDiagonals) {            // Get diagonal neighbors if enabled
-            diagonalOffsets[nodeType].forEach(offset => {
-                const x = node.getX() + offset[0];
-                const y = node.getY() + offset[1];
-                const neighbor = getNodeFromCoordinates(x, y, nodes);
+            diagonalOffsets[cellType].forEach(offset => {
+                const x = cell.getX() + offset[0];
+                const y = cell.getY() + offset[1];
+                const neighbor = getCellFromCoordinates(x, y, cells);
                 if (neighbor) {
                     neighbors.push(neighbor);
                 }
@@ -193,20 +193,20 @@ async function loadOffsets(offsetFileName) {
 }
 
 
-function getNodeFromCoordinates(x, y, nodes) {
-    return nodes.find(node => node.getX() === x && node.getY() === y);
+function getCellFromCoordinates(x, y, cells) {
+    return cells.find(cell => cell.getX() === x && cell.getY() === y);
 }
 
 
-function reconstructPath(cameFrom, currentNode) {
+function reconstructPath(cameFrom, currentCell) {
     finalPath = [];
-    finalPath.push(currentNode);
+    finalPath.push(currentCell);
 
-    // While the start node isn't reached
-    while (cameFrom.has(currentNode.getId())) {             // Structural equality
-        currentNode = cameFrom.get(currentNode.getId());        // Move to the parent from the current node
+    // While the start cell isn't reached
+    while (cameFrom.has(currentCell.getId())) {             // Structural equality
+        currentCell = cameFrom.get(currentCell.getId());        // Move to the parent from the current cell
         
-        finalPath.unshift(currentNode);     // Add node to the start of the path 
+        finalPath.unshift(currentCell);     // Add cell to the start of the path 
     }
 
     console.log("FINAL PATH: ", finalPath);
@@ -215,60 +215,60 @@ function reconstructPath(cameFrom, currentNode) {
 }
 
 
-function getLowestFScoreNode(nodes, openList) {
+function getLowestFScoreCell(cells, openList) {
     let currFScore = Infinity;
-    let lowestFScoreNode = null;
+    let lowestFScoreCell = null;
 
-    openList.forEach(nodeId => {
-        let node = nodes[nodeId];
-        if (node.getFScore() < currFScore) {
-            currFScore = node.getFScore();
-            lowestFScoreNode = node;
+    openList.forEach(cellId => {
+        let cell = cells[cellId];
+        if (cell.getFScore() < currFScore) {
+            currFScore = cell.getFScore();
+            lowestFScoreCell = cell;
         }
     });
 
-    return lowestFScoreNode;
+    return lowestFScoreCell;
 }
 
-function computeHValue(currNode, goalNode, distanceFunction) {
+function computeHValue(currCell, goalCell, distanceFunction) {
     switch (distanceFunction) {
         case 'Manhattan':
-            return (Math.abs(goalNode.x - currNode.x) + Math.abs(goalNode.y - currNode.y));
+            return (Math.abs(goalCell.x - currCell.x) + Math.abs(goalCell.y - currCell.y));
         case 'Euclidean':
-            return Math.sqrt(Math.pow(goalNode.x - currNode.x, 2) + Math.pow(goalNode.y - currNode.y, 2));
+            return Math.sqrt(Math.pow(goalCell.x - currCell.x, 2) + Math.pow(goalCell.y - currCell.y, 2));
         case 'Chebyshev':
-            return Math.max(Math.abs(goalNode.x - currNode.x), Math.abs(goalNode.y - currNode.y));
+            return Math.max(Math.abs(goalCell.x - currCell.x), Math.abs(goalCell.y - currCell.y));
     }
 }
 
 
 function createGrid(rows, cols) {
     let counter = 0;
-    let nodes = [];
+    let cells = [];
     let gridDiv = document.getElementById('grid');
 
     for (let i = 0; i < rows; i++) {
         let newRow = document.createElement('div');
         newRow.setAttribute('class', 'row');
         for (let j = 0; j < cols; j++) {
-            let newNode = document.createElement('div');
-            newNode.setAttribute('class', 'cell');
-            newNode.setAttribute('id', 'cell_' + counter);
-            // newNode.textContent = i + ',' + j;
-            // newNode.textContent = counter;
-            newRow.appendChild(newNode);
+            let newCell = document.createElement('div');
+            newCell.setAttribute('class', 'cell');
+            newCell.setAttribute('id', 'cell_' + counter);
+            // newCell.textContent = i + ',' + j;
+            // newCell.textContent = counter;
+            newRow.appendChild(newCell);
 
-            nodes.push(new Node(counter, i, j, false));
+            cells.push(new Cell(counter, i, j, false));
 
             counter++;
         }
         gridDiv.appendChild(newRow);
     }
 
-    return nodes;
+    return cells;
 }
 
-function setupObstacles(nodes, howMany, gridDimension) {
+function setupObstacles(cells, howMany, gridDimension) {
     let obstaclesId = new Array();
 
     while (obstaclesId.length < howMany) {
@@ -276,7 +276,7 @@ function setupObstacles(nodes, howMany, gridDimension) {
         if (!obstaclesId.includes(rand)) {
             obstaclesId.push(rand);
 
-            nodes[rand].setIsObstacle(true);
+            cells[rand].setIsObstacle(true);
 
             let extractedObstacle = document.getElementById('cell_' + rand);
             extractedObstacle.classList.add('obstacle-cell');
