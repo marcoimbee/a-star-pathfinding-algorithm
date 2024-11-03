@@ -33,8 +33,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             DISTANCE_FUNCTION
         )
     );    
-
-    console.log("ZOOM LEVEL: ", window.devicePixelRatio);
     
     // let obstacles = cells.filter(cell => cell.getIsObstacle() == true);
     // console.table(obstacles);
@@ -283,38 +281,3 @@ function setupObstacles(cells, howMany, gridDimension) {
         }
     }
 }
-
-
-
-/* 
-    ZOOM MANAGEMENT
-**/
-const DISPLAY_SCORES_ON_ZOOM = true;
-
-function getZoomLevel() {
-    const zoomLevel = Math.round(window.devicePixelRatio * 100);
-    return zoomLevel;
-}
-
-function checkZoomLevel() {
-    const zoomLevel = getZoomLevel();
-
-    const div = document.getElementById('cell_0');
-    const zoomedWidth = div.offsetWidth * zoomLevel;
-    const zoomedHeight = div.offsetHeight * zoomLevel;
-
-    if (DISPLAY_SCORES_ON_ZOOM) {
-        // clearCellScores();
-        if (zoomedWidth >= 6000 && zoomedHeight >= 6000) {
-            displayCellScores();
-        } 
-    }
-}
-
-function displayCellScores() {
-    // TODO: how do i get the f and g values here ??? 
-}
-
-
-window.addEventListener('resize', checkZoomLevel);
-window.addEventListener('load', checkZoomLevel);
