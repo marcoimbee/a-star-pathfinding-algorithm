@@ -1,6 +1,5 @@
-# Level design
+# A* pathfinding algorithm
 
-***NOTE**: This is being developed just for fun*
+Implementation of the A* (A Star) pathfinding algorithm to look for the shortest path between two tiles of a grid
 
-Implementation of a videogame level creator by using WFC (Wave Function Collapse). <br>
-Implementation of the A* (A Star) pathfinding algorithm to look for the shortest path between two tiles of the level.
+***NOTE**: This is being developed just for fun. Maybe it's going to be employed in a bigger project one day, maybe not.*
